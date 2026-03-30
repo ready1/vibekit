@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.Python
+
+# Benchmark artefacts
+*.db
+*.db-shm
+*.db-wal
+
+# memstack (cloned dependency — not versioned here)
+memstack/
+
+# Environment
+.env
+.env.local
+
+# macOS
+.DS_Store
+
+# Editors
+.idea/
+.vscode/
+*.swp
