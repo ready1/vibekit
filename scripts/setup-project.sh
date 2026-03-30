@@ -83,7 +83,10 @@ fi
 step "rtk"
 if command -v rtk &>/dev/null; then
   CURRENT=$(rtk --version 2>/dev/null || echo "unknown")
-  brew upgrade rtk 2>/dev/null && ok "rtk upgraded" || skip "rtk already up to date ($CURRENT)"
+  brew upgrade rtk 2>/dev/null || true
+  # reinstall if upgrade removed it without replacing it
+  command -v rtk &>/dev/null || brew install rtk
+  ok "rtk $(rtk --version 2>/dev/null) ready"
 else
   brew install rtk
   ok "rtk $(rtk --version) installed"
@@ -93,9 +96,11 @@ fi
 step "memstack"
 MEMSTACK_DIR="$PROJECT_DIR/.claude/skills"
 
-if [[ -d "$MEMSTACK_DIR/.git" ]]; then
-  git -C "$MEMSTACK_DIR" pull --quiet
-  skip "memstack updated ($(git -C "$MEMSTACK_DIR" rev-parse --short HEAD))"
+if [[ -f "$MEMSTACK_DIR/db/memstack-db.py" ]]; then
+  # memstack already installed — update if it's a git repo, skip if not
+  git -C "$MEMSTACK_DIR" pull --quiet 2>/dev/null \
+    && skip "memstack updated ($(git -C "$MEMSTACK_DIR" rev-parse --short HEAD 2>/dev/null))" \
+    || skip "memstack already installed"
 else
   mkdir -p "$PROJECT_DIR/.claude"
   git clone https://github.com/cwinvestments/memstack "$MEMSTACK_DIR" --quiet
